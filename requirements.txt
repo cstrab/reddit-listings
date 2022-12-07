@@ -1,0 +1,14 @@
+certifi==2022.9.24
+charset-normalizer==2.1.1
+click @ file:///home/conda/feedstock_root/build_artifacts/click_1666798198223/work
+idna==3.4
+praw==7.6.1
+prawcore==2.3.0
+psaw==0.1.0
+psycopg2 @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_b5vqnh3a1_/croot/psycopg2_1666817457480/work
+python-dotenv @ file:///home/conda/feedstock_root/build_artifacts/python-dotenv_1662230030282/work
+requests==2.28.1
+SQLAlchemy==1.4.44
+update-checker==0.18.0
+urllib3==1.26.13
+websocket-client==1.4.2
