@@ -8,7 +8,7 @@ load_dotenv()
 # .env file should be at root level formatted as below:
 # PYTHONUNBUFFERED=1
 # UID=''
-# PWD=''
+# PW=''
 # HOST=''
 # PORT=''
 # DATABASE=''
@@ -18,9 +18,29 @@ load_dotenv()
 # VERSION=''
 # REDDIT_USERNAME=''
 
+# PostgreSQL setup:
+# -- Table: public.posts
+#
+# -- DROP TABLE IF EXISTS public.posts;
+#
+# CREATE TABLE IF NOT EXISTS public.posts
+# (
+#     id text COLLATE pg_catalog."default" NOT NULL,
+#     title text COLLATE pg_catalog."default" NOT NULL,
+#     body text COLLATE pg_catalog."default" NOT NULL,
+#     author text COLLATE pg_catalog."default" NOT NULL,
+#     created text COLLATE pg_catalog."default" NOT NULL,
+#     CONSTRAINT posts_pkey PRIMARY KEY (id)
+# )
+#
+# TABLESPACE pg_default;
+#
+# ALTER TABLE IF EXISTS public.posts
+#     OWNER to user_1;
+
 conn_params = dict(
     uid=os.environ['UID'],
-    pwd=os.environ['PWD'],
+    pwd=os.environ['PW'],
     host=os.environ['HOST'],
     port=os.environ['PORT'],
     db=os.environ['DATABASE']
@@ -34,22 +54,23 @@ reddit_params = dict(
     reddit_username=os.environ['REDDIT_USERNAME']
 )
 
-database = PostgreSQLConnector(**conn_params)
+# Intializing connector and scraper
+connector = PostgreSQLConnector(**conn_params)
+scraper = AppleSwapScraper(connector=connector, subreddit='appleswap', **reddit_params)
 
-scraper = AppleSwapScraper(database=database, subreddit='appleswap', **reddit_params)
-
-
-
-# Test
-new_submissions = scraper.subreddit.new(limit=1)
-
-content = []
-
-for submission in new_submissions:
-    title = submission.title
-    selftext = submission.selftext
-    content.append(f'Title: {title}'+' '+f'Description: {selftext}')
-
-print(content)
+# Inital Data Pull (Last 1000 posts on r/appleswap)
+new_posts = scraper.subreddit.new(limit=1000)
+query = """INSERT INTO posts (id, title, body, author, created) 
+        VALUES (%s, %s, %s, %s, %s);"""
+print('Scraping Initiated <(x.x)>')
+for post in new_posts:
+    scraper.engine.execute(query, (
+        post.id,
+        post.title,
+        post.selftext,
+        post.author.name if post.author else "",
+        post.created,
+    ))
+print('Scraping Complete <(-.-)<')
 
 
